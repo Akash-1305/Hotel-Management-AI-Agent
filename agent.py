@@ -12,7 +12,7 @@ from tools import (
     get_room_occupancy_stats,
     get_current_stays,
     get_revenue_by_room_type,
-    get_customer_bookings
+    get_customer_bookings,
 )
 import os
 from dotenv import load_dotenv
@@ -21,8 +21,8 @@ load_dotenv()
 
 llm = ChatOpenAI(
     api_key=os.getenv("GEMINI_API_KEY"),
-    base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-    model="gemini-2.0-flash-lite",
+    base_url="https://router.requesty.ai/v1",
+    model="google/gemini-2.0-flash-001",
     temperature=0
 )
 
@@ -56,7 +56,7 @@ Specialized Tools Available:
 tools = [
     read_records, 
     describe_table, 
-    custom_query,
+    # custom_query,
     get_vacant_rooms,
     get_upcoming_arrivals,
     get_upcoming_departures,
@@ -68,7 +68,7 @@ tools = [
 ]
 
 agent: Runnable = create_react_agent(
-    llm=llm,
+    model=llm,
     tools=tools,
     prompt=system_prompt
 )

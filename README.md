@@ -1,6 +1,6 @@
 # Hotel Management ReAct Agent
 
-This project is a LangChain-powered ReAct agent that interacts with a hotel management SQLite database using Google's Gemini 2.0 Flash Lite via OpenAI-compatible API.
+This project is a LangChain-powered ReAct agent that interacts with a hotel management SQLite database using Google's Gemini 2.0 Flash Lite via OpenAI-compatible API. It now includes a FastAPI-based REST API for programmatic access.
 
 ## Features
 
@@ -11,12 +11,14 @@ This project is a LangChain-powered ReAct agent that interacts with a hotel mana
 - 🗃️ SQLite backend with realistic schema and sample data
 - 📊 Specialized tools for hotel analytics and insights
 - 👥 Customer tracking with name and booking history
+- 🚀 **NEW!** RESTful API with FastAPI for programmatic access
 
 ## Files
 
 - `setup.py`: Creates `hotel.db` with schema and dummy data.
 - `tools.py`: LangChain tools for reading records, describing tables, and running specialized hotel queries.
 - `agent.py`: ReAct agent using Gemini 2.0 Flash Lite via OpenAI SDK.
+- **`api.py`**: FastAPI application exposing hotel management operations as REST endpoints.
 - `.env`: Required environment variables (not included in repo).
 - `setup.sh`: Interactive setup script for macOS/Linux.
 - `setup.bat`: Interactive setup script for Windows.
@@ -58,7 +60,7 @@ If you prefer to set up manually, follow these steps:
 ### 2. Install dependencies
 
 ```bash
-pip install langchain langgraph langchain-openai python-dotenv sqlite3
+pip install langchain langgraph langchain-openai python-dotenv sqlite3 fastapi uvicorn pyjwt python-multipart
 ```
 
 ### 3. Create a `.env` file
@@ -68,9 +70,10 @@ Create a file named `.env` in the project root directory with the following cont
 ```env
 GEMINI_API_KEY=your_google_api_key_here
 SQLITE_DB_PATH=hotel.db
+JWT_SECRET_KEY=your_secret_key_here
 ```
 
-Replace `your_google_api_key_here` with the actual API key you obtained.
+Replace `your_google_api_key_here` with the actual API key you obtained and use a strong random string for `JWT_SECRET_KEY`.
 
 **Security Warning**: Never commit your `.env` file to version control or share it with others. Add it to your `.gitignore` file.
 
@@ -100,6 +103,76 @@ The system includes several specialized tools for hotel analytics:
 - **Guest Movement**: Track upcoming arrivals and departures
 - **Customer Insights**: Identify frequent customers and booking history
 - **Business Intelligence**: Analyze occupancy rates and revenue performance
+
+## REST API Usage
+
+The project now includes a complete REST API built with FastAPI that can be used to programmatically access and manage the hotel system.
+
+### Starting the API Server
+
+```bash
+# Make sure your virtual environment is activated first
+python api.py
+```
+
+The API server will start on http://localhost:8000. You can view the interactive API documentation at http://localhost:8000/docs.
+
+### API Authentication
+
+The API uses JWT token-based authentication:
+
+1. Login using the `/api/auth/login` endpoint with username "admin" and password "password123" (demo credentials)
+2. Use the returned access token in the Authorization header for other requests: `Bearer {token}`
+
+### Available Endpoints
+
+#### Authentication
+- `POST /api/auth/login` - Obtain access token
+- `POST /api/auth/logout` - Logout (invalidate token)
+- `POST /api/auth/refresh-token` - Refresh access token
+
+#### Room Management
+- `GET /api/rooms` - List all rooms
+- `GET /api/rooms/{room_id}` - Get room details
+- `GET /api/rooms/available` - Get available rooms
+- `PUT /api/rooms/{room_id}/status` - Update room status
+
+#### Booking Management
+- `GET /api/bookings` - List all bookings
+- `GET /api/bookings/{booking_id}` - Get booking details
+- `POST /api/bookings` - Create new booking
+- `PUT /api/bookings/{booking_id}` - Update booking
+- `DELETE /api/bookings/{booking_id}` - Cancel booking
+- `POST /api/bookings/{booking_id}/check-in` - Check-in guest
+- `POST /api/bookings/{booking_id}/check-out` - Check-out guest
+
+#### Guest Management
+- `GET /api/guests` - List all guests
+- `GET /api/guests/{guest_id}` - Get guest details
+- `POST /api/guests` - Create new guest
+- `PUT /api/guests/{guest_id}` - Update guest information
+
+#### Statistics & Analytics
+- `GET /api/stats/occupancy` - Get current occupancy stats
+- `GET /api/stats/bookings` - Get booking statistics
+- `GET /api/stats/revenue` - Get revenue data
+- `GET /api/stats/forecast` - Get occupancy forecast
+
+#### AI Chat
+- `POST /api/chat/message` - Send message to AI assistant
+- `GET /api/chat/history` - Get chat history
+
+### Example API Usage
+
+Using curl to authenticate and get available rooms:
+
+```bash
+# Login and get token
+TOKEN=$(curl -s -X POST "http://localhost:8000/api/auth/login" -H "Content-Type: application/x-www-form-urlencoded" -d "username=admin&password=password123" | jq -r '.access_token')
+
+# Get available rooms
+curl -X GET "http://localhost:8000/api/rooms/available" -H "Authorization: Bearer $TOKEN"
+```
 
 ---
 

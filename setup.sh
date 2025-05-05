@@ -29,6 +29,13 @@ source venv/bin/activate
 echo -e "\n${YELLOW}Installing dependencies...${NC}"
 pip install langchain langgraph langchain-openai python-dotenv
 
+# Install required dependencies for API server
+echo -e "\n${YELLOW}Installing additional dependencies for API server...${NC}"
+pip install fastapi uvicorn pyjwt python-multipart python-dotenv
+
+echo -e "\n${GREEN}Dependencies installed successfully!${NC}"
+echo -e "${YELLOW}To run the API server, execute:${NC} ${BLUE}python api.py${NC}"
+
 # Interactive API key setup
 echo -e "\n${YELLOW}Setting up environment file...${NC}"
 echo -e "${BLUE}Do you have a Google Gemini API key? (y/n)${NC}"
@@ -75,7 +82,7 @@ if [ "$run_test" = "y" ]; then
     
     # Create a temporary Python script to run the query
     echo "from agent import agent" > temp_query.py
-    echo "response = agent.invoke({\"input\": \"$query\"})" >> temp_query.py
+    echo "response = agent.invoke({\"messages\": [\"$query\"]})" >> temp_query.py
     echo "print(response[\"output\"])" >> temp_query.py
     
     # Run the query
