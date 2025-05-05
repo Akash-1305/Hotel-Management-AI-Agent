@@ -16,6 +16,8 @@ def setup_database(db_path="hotel.db"):
     cursor.execute("""
     CREATE TABLE Customers (
         CustomerID INTEGER PRIMARY KEY,
+        FirstName TEXT NOT NULL,
+        LastName TEXT NOT NULL,
         DOB DATE NOT NULL,
         IdentityType TEXT CHECK(IdentityType IN ('Adhar', 'PAN', 'DL')) NOT NULL,
         IdentityString TEXT NOT NULL
@@ -57,10 +59,10 @@ def setup_database(db_path="hotel.db"):
     """)
 
     cursor.executemany("""
-    INSERT INTO Customers (CustomerID, DOB, IdentityType, IdentityString) VALUES (?, ?, ?, ?);
+    INSERT INTO Customers (CustomerID, FirstName, LastName, DOB, IdentityType, IdentityString) VALUES (?, ?, ?, ?, ?, ?);
     """, [
-        (1, '1990-01-01', 'Adhar', '1234-5678-9012'),
-        (2, '1985-05-23', 'PAN', 'ABCDE1234F'),
+        (1, 'John', 'Doe', '1990-01-01', 'Adhar', '1234-5678-9012'),
+        (2, 'Jane', 'Smith', '1985-05-23', 'PAN', 'ABCDE1234F'),
     ])
 
     cursor.executemany("""
@@ -81,7 +83,7 @@ def setup_database(db_path="hotel.db"):
     INSERT INTO Rooms (RoomID, isVacant, currentStay, type, price) VALUES (?, ?, ?, ?, ?);
     """, [
         (101, False, 1, '2BHK', 1500),
-        (102, True, NULL, '3BHK', 2500),
+        (102, True, None, '3BHK', 2500),
     ])
 
     conn.commit()
