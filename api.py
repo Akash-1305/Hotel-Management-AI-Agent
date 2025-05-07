@@ -12,8 +12,19 @@ from tools import (
     get_hotel_statistics, add_new_room, search_customers, get_all_tables
 )
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Use specific origins in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/vacant-rooms")
 def vacant_rooms(room_type: Optional[str] = None):
@@ -202,6 +213,11 @@ def find_customers(search_term: str):
 def all_tables():
     """Get a list of all tables in the database"""
     return get_all_tables.run({})
+
+@app.get("/", response_class=HTMLResponse)
+async def serve_index():
+    with open("frontend/index.html", "r", encoding="utf-8") as file:
+        return file.read()
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8080, reload=True)

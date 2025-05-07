@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hotel Management - Frontend Mock</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background-color: #f4f6f9;
+      color: #333;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .section {
+      margin-bottom: 40px;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    pre {
+      background: #eee;
+      padding: 10px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🏨 Hotel Management System</h1>
+
+  <!-- Vacant Rooms -->
+  <div class="section">
+    <h2>Available Rooms</h2>
+    <button onclick="getVacantRooms()">Show Vacant Rooms</button>
+    <pre id="vacant-rooms-output"></pre>
+  </div>
+
+  <!-- Book Room -->
+  <div class="section">
+    <h2>Book a Room</h2>
+    <label>Customer ID</label>
+    <input type="number" id="book-customer-id" />
+    <label>Room ID</label>
+    <input type="number" id="book-room-id" />
+    <label>Arrival Date</label>
+    <input type="date" id="arrival-date" />
+    <label>Departure Date</label>
+    <input type="date" id="departure-date" />
+    <label>Payment ID</label>
+    <input type="number" id="payment-id" />
+    <button onclick="bookRoom()">Book Now</button>
+    <pre id="book-result"></pre>
+  </div>
+
+  <!-- Customer Search -->
+  <div class="section">
+    <h2>Search Customer</h2>
+    <label>Search Term</label>
+    <input type="text" id="customer-search-term" />
+    <button onclick="searchCustomers()">Search</button>
+    <pre id="customer-results"></pre>
+  </div>
+
+  <!-- Hotel Statistics -->
+  <div class="section">
+    <h2>Hotel Stats</h2>
+    <button onclick="getHotelStats()">Load Hotel Statistics</button>
+    <pre id="hotel-stats-output"></pre>
+  </div>
+
+  <!-- Check-In Guest -->
+  <div class="section">
+    <h2>Check In Guest</h2>
+    <label>Room ID</label>
+    <input type="number" id="check-in-room-id" />
+    <label>Booking ID</label>
+    <input type="number" id="check-in-booking-id" />
+    <button onclick="checkInGuest()">Check In</button>
+    <pre id="check-in-result"></pre>
+  </div>
+
+  <!-- Check-Out Guest -->
+  <div class="section">
+    <h2>Check Out Guest</h2>
+    <label>Room ID</label>
+    <input type="number" id="check-out-room-id" />
+    <button onclick="checkOutGuest()">Check Out</button>
+    <pre id="check-out-result"></pre>
+  </div>
+
+  <!-- Room Availability -->
+  <div class="section">
+    <h2>Check Room Availability</h2>
+    <label>Room ID</label>
+    <input type="number" id="avail-room-id" />
+    <label>Start Date</label>
+    <input type="date" id="start-date" />
+    <label>End Date</label>
+    <input type="date" id="end-date" />
+    <button onclick="checkRoomAvailability()">Check Availability</button>
+    <pre id="availability-result"></pre>
+  </div>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+
+    function handleResponse(data, outputId) {
+      document.getElementById(outputId).textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function getVacantRooms() {
+      const res = await fetch(`${API_BASE}/vacant-rooms`);
+      const data = await res.json();
+      handleResponse(data, "vacant-rooms-output");
+    }
+
+    async function bookRoom() {
+      const customer_id = parseInt(document.getElementById("book-customer-id").value);
+      const room_id = parseInt(document.getElementById("book-room-id").value);
+      const arrival_date = document.getElementById("arrival-date").value;
+      const departure_day = document.getElementById("departure-date").value;
+      const payment_id = parseInt(document.getElementById("payment-id").value);
+
+      const res = await fetch(`${API_BASE}/book-room`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customer_id, room_id, arrival_date, departure_day, payment_id })
+      });
+      const data = await res.json();
+      handleResponse(data, "book-result");
+    }
+
+    async function searchCustomers() {
+      const term = document.getElementById("customer-search-term").value;
+      const res = await fetch(`${API_BASE}/customers/search?search_term=${term}`);
+      const data = await res.json();
+      handleResponse(data, "customer-results");
+    }
+
+    async function getHotelStats() {
+      const res = await fetch(`${API_BASE}/hotel-statistics`);
+      const data = await res.json();
+      handleResponse(data, "hotel-stats-output");
+    }
+G
+    async function checkInGuest() {
+      const room_id = parseInt(document.getElementById("check-in-room-id").value);
+      const booking_id = parseInt(document.getElementById("check-in-booking-id").value);
+      const res = await fetch(`${API_BASE}/check-in`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ room_id, booking_id })
+      });
+      const data = await res.json();
+      handleResponse(data, "check-in-result");
+    }
+
+    async function checkOutGuest() {
+      const room_id = parseInt(document.getElementById("check-out-room-id").value);
+      const res = await fetch(`${API_BASE}/check-out`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ room_id })
+      });
+      const data = await res.json();
+      handleResponse(data, "check-out-result");
+    }
+
+    async function checkRoomAvailability() {
+      const room_id = parseInt(document.getElementById("avail-room-id").value);
+      const start_date = document.getElementById("start-date").value;
+      const end_date = document.getElementById("end-date").value;
+
+      const res = await fetch(`${API_BASE}/room-availability/${room_id}?start_date=${start_date}&end_date=${end_date}`);
+      const data = await res.json();
+      handleResponse(data, "availability-result");
+    }
+  </script>
+
+</body>
+</html>
