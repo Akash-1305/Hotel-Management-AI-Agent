@@ -11,7 +11,7 @@ const ArrivalTable = ({ arrivals = [] }) => {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow-sm">
+    <div className="bg-white rounded-lg shadow-sm mt-5">
       <div className="flex justify-between items-center p-4 border-b">
         <h2 className="text-lg font-semibold">Arrivals</h2>
         <div className="flex items-center space-x-2">
