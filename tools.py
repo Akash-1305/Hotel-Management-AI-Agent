@@ -878,7 +878,7 @@ def get_all_bookings() -> List[Dict[str, Any]]:
         b.*, 
         r.RoomID, r.type as room_type, r.price as room_price
     FROM Bookings b
-    LEFT JOIN Rooms r ON r.currentStay = b.BookingsID
+    LEFT JOIN Rooms r ON r.RoomID = b.RoomID
     """
     return run_query(query)
 
