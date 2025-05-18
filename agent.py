@@ -91,7 +91,6 @@ tools = [
     update_customer_info,
     cancel_booking,
     apply_discount,
-    # New tools added below
     get_room_by_id,
     get_customer_by_id,
     get_booking_details,
@@ -104,7 +103,11 @@ tools = [
     get_hotel_statistics,
     add_new_room,
     search_customers,
-    get_all_tables
+    get_all_tables,
+    get_all_customers,
+    get_all_bookings,
+    get_all_rooms,
+    get_all_payments
 ]
 
 agent: Runnable = create_react_agent(

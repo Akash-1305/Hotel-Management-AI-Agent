@@ -42,7 +42,14 @@ def run_query(query: str, params: tuple = ()) -> List[Dict[str, Any]]:
         
         # For other queries, commit changes and return affected row count
         conn.commit()
-        return [{"affected_rows": cursor.rowcount}]
+        # For other queries, commit changes and return useful information
+        if query.strip().lower().startswith("insert"):
+            last_id = cursor.lastrowid
+            table_name = query.split("INTO")[1].split("(")[0].strip() if "INTO" in query else "unknown"
+            id_field = f"{table_name[:-1] if table_name.endswith('s') else table_name}ID"
+            return [{"success": True, "affected_rows": cursor.rowcount, id_field: last_id}]
+        else:
+            return [{"success": True, "affected_rows": cursor.rowcount}]
         
     except sqlite3.Error as e:
         if conn:
@@ -831,4 +838,44 @@ def get_all_tables() -> List[Dict[str, Any]]:
         List of all database tables
     """
     query = "SELECT name FROM sqlite_master WHERE type='table'"
+    return run_query(query)
+
+@tool
+def get_all_customers() -> List[Dict[str, Any]]:
+    """Retrieve all customers from the database.
+    
+    Returns:
+        List of all customers
+    """
+    query = "SELECT * FROM Customers"
+    return run_query(query)
+
+@tool
+def get_all_bookings() -> List[Dict[str, Any]]:
+    """Retrieve all bookings from the database.
+    
+    Returns:
+        List of all bookings
+    """
+    query = "SELECT * FROM Bookings"
+    return run_query(query)
+
+@tool
+def get_all_rooms() -> List[Dict[str, Any]]:
+    """Retrieve all rooms from the database.
+    
+    Returns:
+        List of all rooms
+    """
+    query = "SELECT * FROM Rooms"
+    return run_query(query)
+
+@tool
+def get_all_payments() -> List[Dict[str, Any]]:
+    """Retrieve all payments from the database.
+
+    Returns:
+        List of all payments
+    """
+    query = "SELECT * FROM Pricing"
     return run_query(query)

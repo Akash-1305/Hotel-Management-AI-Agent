@@ -9,7 +9,8 @@ from tools import (
     get_room_by_id, get_customer_by_id, get_booking_details,
     search_rooms_by_price, get_room_availability, list_bookings_by_date_range,
     get_payment_details, update_room_info, update_booking_details,
-    get_hotel_statistics, add_new_room, search_customers, get_all_tables
+    get_hotel_statistics, add_new_room, search_customers, get_all_tables,
+    get_all_customers, get_all_bookings, get_all_rooms, get_all_payments
 )
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
@@ -213,6 +214,26 @@ def find_customers(search_term: str):
 def all_tables():
     """Get a list of all tables in the database"""
     return get_all_tables.run({})
+
+@app.get("/all-customers")
+def all_customers():
+    """Retrieve all customers from the database"""
+    return get_all_customers.run({})
+
+@app.get("/all-bookings")
+def all_bookings():
+    """Retrieve all bookings from the database"""
+    return get_all_bookings.run({})
+
+@app.get("/all-rooms")
+def all_rooms():
+    """Retrieve all rooms from the database"""
+    return get_all_rooms.run({})
+
+@app.get("/all-payments")
+def all_payments():
+    """Retrieve all payments from the database"""
+    return get_all_payments.run({})
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
