@@ -6,8 +6,7 @@ from tools import *
 import os
 import datetime
 from dotenv import load_dotenv
-import json
-
+from langgraph.checkpoint.memory import InMemorySaver
 load_dotenv()
 
 today = datetime.datetime.now()
@@ -115,7 +114,7 @@ tools = [
 agent: Runnable = create_react_agent(
     model=llm,
     tools=tools,
-    prompt=system_prompt
+    prompt=system_prompt, checkpointer=InMemorySaver(),
 )
 
 def parse_ai_and_tools_messages(messages):
@@ -132,7 +131,7 @@ def parse_ai_and_tools_messages(messages):
             tool_name = msg.name
             content = msg.content.strip()
             if content:
-                parsed_output.append(f"🔧 Tool `{tool_name}` response:\n{content}")
+                parsed_output.append(f"🔧 Tool `{tool_name}` was used.")
 
     return "\n\n".join(parsed_output)
 

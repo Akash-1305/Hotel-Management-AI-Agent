@@ -240,7 +240,7 @@ def all_payments():
 @app.get("/chat-ai")
 async def serve_chat_ai(user_query:str):
     resAi = await agent.ainvoke({"messages": [
-            HumanMessage(content=user_query),]})
+            HumanMessage(content=user_query),]},config={"thread_id": "1"})
     print(resAi)
     resAi = parse_ai_and_tools_messages(resAi["messages"])
     return resAi
