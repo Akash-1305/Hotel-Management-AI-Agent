@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { MessageCircle, X } from "lucide-react";
 
-const API_BASE = "http://127.0.0.1:8000"; // Update if different
+const API_BASE = "http://127.0.0.1:8000";
 
 const ChatButton = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,6 +15,15 @@ const ChatButton = () => {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const messagesEndRef = useRef(null);
+
+  // Scroll to bottom whenever messages or loading changes
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
+    }
+  }, [messages, loading]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -58,9 +67,19 @@ const ChatButton = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-20">
+    <>
+      {/* Chat window */}
       {isOpen && (
-        <div className="bg-white rounded-lg shadow-xl mb-4 w-80 h-96 flex flex-col overflow-hidden">
+        <div
+          className="bg-white rounded-lg shadow-xl flex flex-col overflow-hidden fixed mb-4"
+          style={{
+            width: "40vw",
+            height: "75vh",
+            bottom: "80px",
+            right: "24px",
+            zIndex: 30,
+          }}
+        >
           <div className="bg-blue-700 text-white p-4 flex justify-between items-center">
             <h3 className="font-medium">AI Assist</h3>
             <button
@@ -71,15 +90,15 @@ const ChatButton = () => {
             </button>
           </div>
 
-          <div className="flex-1 p-4 overflow-y-auto">
+          <div ref={messagesEndRef} className="flex-1 p-4 overflow-y-auto">
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`p-3 rounded-lg ${
-                  msg.sender === "support"
-                    ? "bg-gray-100 rounded-tl-none"
-                    : "bg-blue-200 rounded-tr-none ml-auto"
-                } max-w-[80%] mb-3`}
+                className={`p-3 rounded-lg max-w-[80%] mb-3 ${
+                  msg.sender === "user"
+                    ? "bg-blue-200 rounded-tr-none ml-auto"
+                    : "bg-gray-100 rounded-tl-none"
+                }`}
               >
                 <p className="text-sm">{msg.text}</p>
                 <span className="text-xs text-gray-500 mt-1 block">
@@ -102,6 +121,9 @@ const ChatButton = () => {
                 placeholder="Type a message..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") sendMessage();
+                }}
                 className="flex-1 border rounded-l-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
@@ -115,14 +137,15 @@ const ChatButton = () => {
         </div>
       )}
 
+      {/* Chat icon button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-blue-700 text-white rounded-full p-4 shadow-lg hover:bg-blue-800 transition-colors flex items-center justify-center"
+        className="fixed bottom-6 right-6 bg-blue-700 text-white rounded-full p-4 shadow-lg hover:bg-blue-800 transition-colors flex items-center justify-center z-40"
+        aria-label="Toggle chat"
       >
         <MessageCircle className="h-6 w-6" />
-        <span className="sr-only">Chat</span>
       </button>
-    </div>
+    </>
   );
 };
 

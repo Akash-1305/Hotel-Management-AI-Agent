@@ -10,6 +10,7 @@ function AddCustomer({ onSuccess }) {
     identity_type: "",
     identity_string: "",
   });
+
   const [message, setMessage] = useState("");
 
   const clearFields = () => {
@@ -31,8 +32,9 @@ function AddCustomer({ onSuccess }) {
     console.log("Sending data:", formData); // Debugging log
 
     try {
+      // ✅ Send data as query parameters
       const response = await axios.post(`${API_BASE}/add-customer`, null, {
-        params: formData, // Send data as query parameters
+        params: formData,
         headers: { "Content-Type": "application/json" },
       });
 
@@ -46,7 +48,7 @@ function AddCustomer({ onSuccess }) {
       };
       console.error("Server Response:", errorMsg);
 
-      // Ensure we display meaningful error messages
+      // ✅ Show error message
       setMessage(
         typeof errorMsg === "object"
           ? JSON.stringify(errorMsg)
@@ -59,23 +61,33 @@ function AddCustomer({ onSuccess }) {
     <form onSubmit={handleSubmit} className="space-y-4 p-4 rounded">
       <h2 className="text-xl font-bold mb-2">Add New Customer</h2>
 
-      {[
-        "first_name",
-        "last_name",
-        "dob",
-        "identity_type",
-        "identity_string",
-      ].map((field) => (
-        <input
-          key={field}
-          name={field}
-          placeholder={field.replace("_", " ").toUpperCase()}
-          value={formData[field]}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
-      ))}
+      {["first_name", "last_name", "identity_type", "identity_string"].map(
+        (field) => (
+          <input
+            key={field}
+            name={field}
+            placeholder={field.replace("_", " ").toUpperCase()}
+            value={formData[field]}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+            required
+          />
+        )
+      )}
+
+      <input
+        type="date"
+        name="dob"
+        value={formData.dob}
+        onChange={handleChange}
+        className="w-full p-2 border rounded"
+        required
+      />
+
+      {/* ✅ Show success or error message */}
+      {message && (
+        <div className="text-sm text-red-600 font-semibold">{message}</div>
+      )}
 
       <button
         type="submit"
