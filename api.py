@@ -236,11 +236,6 @@ def all_rooms():
 def all_payments():
     """Retrieve all payments from the database"""
     return get_all_payments.run({})
-
-@app.get("/", response_class=HTMLResponse)
-async def serve_index():
-    with open("frontend/index.html", "r", encoding="utf-8") as file:
-        return file.read()
     
 @app.get("/chat-ai")
 async def serve_chat_ai(user_query:str):
@@ -251,4 +246,4 @@ async def serve_chat_ai(user_query:str):
     return resAi
 
 if __name__ == "__main__":
-    uvicorn.run("api:app", host="127.0.0.1", port=8080, reload=True)
+    uvicorn.run("api:app", host="127.0.0.1", port=8000, reload=True)
