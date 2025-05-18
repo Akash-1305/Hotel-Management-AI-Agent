@@ -362,15 +362,18 @@ def add_payment(payment_type: str, price: float, discount: float = 0.0, is_done:
 def book_room(customer_id: int, room_id: int, arrival_date: str, departure_day: str, payment_id: int) -> List[Dict[str, Any]]:
     """Book a room and update room status."""
     booking_query = """
-    INSERT INTO Bookings (customerID, bookedDate, arrivalDate, departureDay, paymentID)
-    VALUES (?, date('now'), ?, ?, ?)
+    INSERT INTO Bookings (customerID, bookedDate, arrivalDate, departureDay, paymentID, RoomID)
+    VALUES (?, date('now'), ?, ?, ?, ?)
     """
-    result = run_query(booking_query, (customer_id, arrival_date, departure_day, payment_id))
+    result = run_query(booking_query, (customer_id, arrival_date, departure_day, payment_id, room_id))
     if "error" in result[0]:
         return result
     booking_id = result[0].get("BookingID", None)
-
-    return [{"booking_id": booking_id}]
+    update_room_query = """
+    UPDATE Rooms SET isVacant = 0, currentStay = ? WHERE RoomID = ?
+    """
+    update_result = run_query(update_room_query, (booking_id, room_id))
+    return [{"booking_id": booking_id, **update_result[0]}]
 
 @tool
 def check_in_guest(room_id: int, booking_id: int) -> List[Dict[str, Any]]:
@@ -383,7 +386,7 @@ def check_in_guest(room_id: int, booking_id: int) -> List[Dict[str, Any]]:
         return [{"error": "Room is already occupied"}]
 
     # Check if the booking exists and is not assigned to another room
-    booking = run_query("SELECT BookingsID, arrivalDate, departureDay FROM Bookings WHERE BookingsID = ?", (booking_id,))
+    booking = run_query("SELECT BookingsID, arrivalDate, departureDay, RoomID FROM Bookings WHERE BookingsID = ?", (booking_id,))
     if not booking:
         return [{"error": "Booking not found"}]
 
@@ -402,10 +405,9 @@ def check_in_guest(room_id: int, booking_id: int) -> List[Dict[str, Any]]:
         return [{"error": f"Booking is not valid for today (today: {today}, arrival: {arrival}, departure: {departure})"}]
 
     # All checks passed, perform check-in
-    query = """
-    UPDATE Rooms SET isVacant = 0, currentStay = ? WHERE RoomID = ?
-    """
-    return run_query(query, (booking_id, room_id))
+    update_room = run_query("UPDATE Rooms SET isVacant = 0, currentStay = ? WHERE RoomID = ?", (booking_id, room_id))
+    update_booking = run_query("UPDATE Bookings SET RoomID = ? WHERE BookingsID = ?", (room_id, booking_id))
+    return [{"room_update": update_room[0], "booking_update": update_booking[0]}]
 
 @tool
 def checkout_guest(room_id: int) -> List[Dict[str, Any]]:

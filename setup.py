@@ -53,8 +53,10 @@ def setup_database(db_path="hotel.db"):
         arrivalDate DATE NOT NULL,
         departureDay DATE NOT NULL,
         paymentID INTEGER NOT NULL,
+        RoomID INTEGER,
         FOREIGN KEY(customerID) REFERENCES Customers(CustomerID),
-        FOREIGN KEY(paymentID) REFERENCES Pricing(PaymentID)
+        FOREIGN KEY(paymentID) REFERENCES Pricing(PaymentID),
+        FOREIGN KEY(RoomID) REFERENCES Rooms(RoomID)
     );
     """)
 
