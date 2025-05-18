@@ -128,11 +128,11 @@ def parse_ai_and_tools_messages(messages):
             content = msg.content.strip()
             if content:
                 parsed_output.append(f"🤖 AI:\n{content}")
-        elif msg_type == ToolMessage:
-            tool_name = msg.name
-            content = msg.content.strip()
-            if content:
-                parsed_output.append(f"🔧 Tool `{tool_name}` was used.")
+        # elif msg_type == ToolMessage:
+        #     tool_name = msg.name
+        #     content = msg.content.strip()
+        #     if content:
+        #         parsed_output.append(f"🔧 Tool `{tool_name}` was used.")
 
     return "\n\n".join(parsed_output)
 
