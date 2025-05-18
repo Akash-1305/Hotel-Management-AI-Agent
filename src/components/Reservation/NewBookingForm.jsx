@@ -27,8 +27,8 @@ const NewBookingForm = ({ onClose }) => {
         params: {
           customer_id: parseInt(formData.customer_id),
           room_id: parseInt(formData.room_id),
-          arrival_date: formData.arrival_date, // keep as string
-          departure_day: formData.departure_day, // keep as string
+          arrival_date: formData.arrival_date,
+          departure_day: formData.departure_day,
           payment_id: parseInt(formData.payment_id),
         },
       });

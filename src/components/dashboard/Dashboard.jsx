@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import MetricCard from "./MetricCard";
 import BookingsTable from "./BookingsTable";
+import ArrivalTable from "./ArrivalTable";
 
 const Dashboard = () => {
   const today = new Date();
@@ -25,10 +26,12 @@ const Dashboard = () => {
   const [occupancyDataState, setOccupancyDataState] = useState({});
   const [bookingsStats, setBookingsStats] = useState({});
   const [popularityStats, setPopularityStats] = useState({});
+  const [arrivalList, setArrivalList] = useState([]);
 
   useEffect(() => {
     getDashboardStats();
     getBookedRooms();
+    getArrivals();
   }, []);
 
   function getDashboardStats() {
@@ -54,6 +57,17 @@ const Dashboard = () => {
       .get(API_BASE + `/current-stays`)
       .then((res) => {
         setBookingList(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  function getArrivals() {
+    axios
+      .get(API_BASE + `/arrivals`)
+      .then((res) => {
+        setArrivalList(res.data);
       })
       .catch((err) => {
         console.log(err);
@@ -92,6 +106,9 @@ const Dashboard = () => {
       </div>
       <div className="lg:col-span-2">
         <BookingsTable bookings={bookingList} />
+      </div>
+      <div className="lg:col-span-2">
+        <ArrivalTable arrivals={arrivalList} />
       </div>
     </div>
   );

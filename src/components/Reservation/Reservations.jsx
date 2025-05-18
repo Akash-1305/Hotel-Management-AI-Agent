@@ -7,18 +7,12 @@ import NewBookingForm from "./NewBookingForm";
 
 const Reservations = () => {
   const [bookingList, setBookingList] = useState([]);
-  const [show, setShow] = useState(false);
-  const [room, setRoom] = useState({});
-  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
-
-  const handleFormClose = () => {
-    setShowForm(false);
-  };
+  const navigate = useNavigate();
 
   useEffect(() => {
-      getBookedRooms();
-    }, []);
+    getBookedRooms();
+  }, []);
 
   function getBookedRooms() {
     axios
@@ -31,9 +25,11 @@ const Reservations = () => {
       });
   }
 
-  const handleCheckIn = (bookingId) => {
+  const handleCheckIn = (booking) => {
     axios
-      .post(`${API_BASE}/check-in`, { bookingId, RoomID })
+      .post(
+        `${API_BASE}/check-in?room_id=${booking.RoomID}&booking_id=${booking.BookingsID}`
+      )
       .then(() => {
         alert("Checked in successfully!");
         getBookedRooms();
@@ -44,9 +40,9 @@ const Reservations = () => {
       });
   };
 
-  const handleCheckOut = (bookingId) => {
+  const handleCheckOut = (roomId) => {
     axios
-      .post(`${API_BASE}/check-out`, { bookingId })
+      .post(`${API_BASE}/check-out?room_id=${roomId}`)
       .then(() => {
         alert("Checked out successfully!");
         getBookedRooms();
@@ -62,7 +58,7 @@ const Reservations = () => {
       return;
 
     axios
-      .delete(`${API_BASE}/cancel-booking/${bookingId}`)
+      .delete(`${API_BASE}/cancel-booking?booking_id=${bookingId}`)
       .then(() => {
         alert("Booking cancelled.");
         getBookedRooms();
@@ -72,10 +68,6 @@ const Reservations = () => {
         alert("Cancellation failed.");
       });
   };
-
-  useEffect(() => {
-    getBookedRooms();
-  }, []);
 
   return (
     <div>
@@ -93,20 +85,20 @@ const Reservations = () => {
       {showForm && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-          onClick={handleFormClose}
+          onClick={() => setShowForm(false)}
         >
           <div
             className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl relative"
-            onClick={(e) => e.stopPropagation()} // Prevent close on form click
+            onClick={(e) => e.stopPropagation()}
           >
             <button
               className="absolute top-3 right-3 text-gray-600 hover:text-gray-900"
-              onClick={handleFormClose}
+              onClick={() => setShowForm(false)}
               aria-label="Close form"
             >
               <X className="h-6 w-6" />
             </button>
-            <NewBookingForm onClose={handleFormClose} />
+            <NewBookingForm onClose={() => setShowForm(false)} />
           </div>
         </div>
       )}
@@ -126,7 +118,9 @@ const Reservations = () => {
                   <h3 className="font-medium text-black">
                     Booking ID: {booking.BookingsID}
                   </h3>
+                  <p className="mt-1">Room ID: {booking.RoomID}</p>
                   <p className="mt-1">Customer ID: {booking.customerID}</p>
+                  <p className="mt-1">Room Type: {booking.room_type}</p>
                   <p className="mt-1">Booked Date: {booking.bookedDate}</p>
                   <p className="mt-1">Arrival Date: {booking.arrivalDate}</p>
                   <p className="mt-1">Departure Day: {booking.departureDay}</p>
@@ -135,13 +129,13 @@ const Reservations = () => {
 
                 <div className="flex gap-2 mt-4 justify-center">
                   <button
-                    onClick={() => handleCheckIn(booking.BookingsID)}
+                    onClick={() => handleCheckIn(booking)}
                     className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
                   >
                     Check-In
                   </button>
                   <button
-                    onClick={() => handleCheckOut(booking.BookingsID)}
+                    onClick={() => handleCheckOut(booking.RoomID)}
                     className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
                   >
                     Check-Out

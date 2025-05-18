@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { API_BASE } from "../../App"; // Ensure API_BASE is correctly defined
+import { API_BASE } from "../../App";
 
 function AddCustomer({ onSuccess }) {
   const [formData, setFormData] = useState({

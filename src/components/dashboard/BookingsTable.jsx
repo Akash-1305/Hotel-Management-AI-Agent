@@ -4,38 +4,6 @@ import { Search, SlidersHorizontal, MoreVertical } from "lucide-react";
 const BookingsTable = ({ bookings = [] }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const getStatusClass = (status) => {
-    if (!status) return "text-gray-600";
-    switch (status.toLowerCase()) {
-      case "completed":
-        return "text-gray-600";
-      case "cancelled":
-        return "text-red-600";
-      case "arrived":
-        return "text-green-600";
-      case "reserved":
-        return "text-blue-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
-  const getStatusBgClass = (status) => {
-    if (!status) return "bg-gray-100";
-    switch (status.toLowerCase()) {
-      case "completed":
-        return "bg-gray-100";
-      case "cancelled":
-        return "bg-red-100";
-      case "arrived":
-        return "bg-green-100";
-      case "reserved":
-        return "bg-blue-100";
-      default:
-        return "bg-gray-100";
-    }
-  };
-
   const filteredBookings = bookings.filter(
     (booking) =>
       booking?.FirstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
