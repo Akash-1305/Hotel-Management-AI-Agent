@@ -18,7 +18,6 @@ const ChatButton = () => {
 
   const messagesEndRef = useRef(null);
 
-  // Scroll to bottom whenever messages or loading changes
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
@@ -68,7 +67,6 @@ const ChatButton = () => {
 
   return (
     <>
-      {/* Chat window */}
       {isOpen && (
         <div
           className="bg-white rounded-lg shadow-xl flex flex-col overflow-hidden fixed mb-4"
@@ -77,7 +75,6 @@ const ChatButton = () => {
             height: "75vh",
             bottom: "80px",
             right: "24px",
-            zIndex: 30,
           }}
         >
           <div className="bg-blue-700 text-white p-4 flex justify-between items-center">
@@ -137,7 +134,6 @@ const ChatButton = () => {
         </div>
       )}
 
-      {/* Chat icon button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 bg-blue-700 text-white rounded-full p-4 shadow-lg hover:bg-blue-800 transition-colors flex items-center justify-center z-40"

@@ -38,7 +38,6 @@ export default function Customers() {
 
   return (
     <div className="p-3 relative">
-      {/* Overlay Form */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <div className="bg-white p-4 rounded shadow-lg relative w-full max-w-lg">
@@ -46,7 +45,7 @@ export default function Customers() {
               onClick={() => setShowForm(false)}
               className="absolute top-2 right-2 text-gray-600 hover:text-red-600 text-xl font-bold"
             >
-              &times;
+              X
             </button>
             <AddCustomer
               onSuccess={() => {

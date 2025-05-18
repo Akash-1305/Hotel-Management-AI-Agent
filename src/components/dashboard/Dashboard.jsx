@@ -4,13 +4,9 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { API_BASE } from "../../App";
 import {
-  Clock,
   Users,
   CheckCircle,
-  XCircle,
   DollarSign,
-  RefreshCw,
-  CalendarPlus,
 } from "lucide-react";
 import MetricCard from "./MetricCard";
 import BookingsTable from "./BookingsTable";

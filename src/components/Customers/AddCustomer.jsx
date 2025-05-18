@@ -1,102 +1,87 @@
-import React, { useState } from "react";
 import axios from "axios";
-import { API_BASE } from "../../App";
+import { useState } from "react";
 
-function AddCustomer({ onSuccess }) {
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    dob: "",
-    identity_type: "",
-    identity_string: "",
-  });
-
-  const [message, setMessage] = useState("");
-
-  const clearFields = () => {
-    setFormData({
-      first_name: "",
-      last_name: "",
-      dob: "",
-      identity_type: "",
-      identity_string: "",
-    });
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+const AddCustomer = () => {
+  const [first_name, setFirstName] = useState("");
+  const [last_name, setLastName] = useState("");
+  const [dob, setDob] = useState("");
+  const [identity_type, setIdentityType] = useState("");
+  const [identity_string, setIdentityString] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Sending data:", formData); // Debugging log
 
     try {
-      // ✅ Send data as query parameters
-      const response = await axios.post(`${API_BASE}/add-customer`, null, {
-        params: formData,
-        headers: { "Content-Type": "application/json" },
+      await axios.post("http://127.0.0.1:8000/add-customer", null, {
+        params: {
+          first_name,
+          last_name,
+          dob,
+          identity_type,
+          identity_string,
+        },
       });
-
-      console.log(response);
-      clearFields();
-      setMessage("Customer added successfully!");
-      if (onSuccess) onSuccess(response.data);
-    } catch (err) {
-      const errorMsg = err.response?.data || {
-        detail: "Something went wrong!",
-      };
-      console.error("Server Response:", errorMsg);
-
-      // ✅ Show error message
-      setMessage(
-        typeof errorMsg === "object"
-          ? JSON.stringify(errorMsg)
-          : errorMsg.detail || "Something went wrong!"
-      );
+      alert("Customer added successfully");
+      setFirstName("");
+      setLastName("");
+      setDob("");
+      setIdentityType("");
+      setIdentityString("");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Something went wrong!");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 rounded">
-      <h2 className="text-xl font-bold mb-2">Add New Customer</h2>
-
-      {["first_name", "last_name", "identity_type", "identity_string"].map(
-        (field) => (
-          <input
-            key={field}
-            name={field}
-            placeholder={field.replace("_", " ").toUpperCase()}
-            value={formData[field]}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        )
-      )}
-
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto p-4">
       <input
-        type="date"
-        name="dob"
-        value={formData.dob}
-        onChange={handleChange}
-        className="w-full p-2 border rounded"
+        type="text"
+        placeholder="First Name"
+        value={first_name}
+        onChange={(e) => setFirstName(e.target.value)}
+        className="w-full border p-2 rounded"
         required
       />
-
-      {/* ✅ Show success or error message */}
-      {message && (
-        <div className="text-sm text-red-600 font-semibold">{message}</div>
-      )}
-
+      <input
+        type="text"
+        placeholder="Last Name"
+        value={last_name}
+        onChange={(e) => setLastName(e.target.value)}
+        className="w-full border p-2 rounded"
+        required
+      />
+      <input
+        type="date"
+        value={dob}
+        onChange={(e) => setDob(e.target.value)}
+        className="w-full border p-2 rounded"
+        required
+      />
+      <input
+        type="text"
+        placeholder="Identity Type"
+        value={identity_type}
+        onChange={(e) => setIdentityType(e.target.value)}
+        className="w-full border p-2 rounded"
+        required
+      />
+      <input
+        type="text"
+        placeholder="Identity Number"
+        value={identity_string}
+        onChange={(e) => setIdentityString(e.target.value)}
+        className="w-full border p-2 rounded"
+        required
+      />
       <button
         type="submit"
-        className="bg-blue-600 text-white px-4 py-2 rounded"
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
       >
         Add Customer
       </button>
     </form>
   );
-}
+};
 
 export default AddCustomer;

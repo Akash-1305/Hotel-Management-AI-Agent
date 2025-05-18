@@ -40,11 +40,10 @@ const ArrivalTable = ({ arrivals = [] }) => {
               <th className="px-6 py-3">Room Type</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody>
             {filteredArrivals.map((arrival) => (
               <tr
                 key={arrival.BookingsID}
-                className="hover:bg-gray-50 transition-colors"
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   {arrival.RoomID}

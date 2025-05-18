@@ -40,15 +40,11 @@ const BookingsTable = ({ bookings = [] }) => {
               <th className="px-6 py-3">Price</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody>
             {filteredBookings.map((booking) => {
-              const status = booking.payment_completed
-                ? "Completed"
-                : "Reserved";
               return (
                 <tr
                   key={booking.RoomID}
-                  className="hover:bg-gray-50 transition-colors"
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     {booking.RoomID}
