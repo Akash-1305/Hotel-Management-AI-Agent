@@ -369,12 +369,8 @@ def book_room(customer_id: int, room_id: int, arrival_date: str, departure_day: 
     if "error" in result[0]:
         return result
     booking_id = result[0].get("BookingID", None)
-    update_room_query = """
-    UPDATE Rooms SET isVacant = 0, currentStay = ? WHERE RoomID = ?
-    """
-    update_result = run_query(update_room_query, (booking_id, room_id))
 
-    return [{"booking_id": booking_id, **update_result[0]}]
+    return [{"booking_id": booking_id}]
 
 @tool
 def check_in_guest(room_id: int, booking_id: int) -> List[Dict[str, Any]]:
