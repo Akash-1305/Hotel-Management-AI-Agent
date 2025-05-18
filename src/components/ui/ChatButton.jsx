@@ -2,16 +2,19 @@ import React, { useState } from "react";
 import axios from "axios";
 import { MessageCircle, X } from "lucide-react";
 
+const API_BASE = "http://127.0.0.1:8000"; // Update if different
+
 const ChatButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       text: "Hello! How can I help you today?",
-      sender: "support",
+      sender: "AI Assist",
       time: new Date().toLocaleTimeString(),
     },
   ]);
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -23,19 +26,34 @@ const ChatButton = () => {
     };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setLoading(true);
 
     try {
-      const response = await axios.get("/chat-ai", {
+      const response = await axios.get(`${API_BASE}/chat-ai`, {
         params: { user_query: input },
       });
+
+      const botText =
+        typeof response.data === "string"
+          ? response.data
+          : response.data.response || "I'm not sure how to respond to that.";
+
       const botMessage = {
-        text: response.data.response,
-        sender: "support",
+        text: botText,
+        sender: "AI Assist",
         time: new Date().toLocaleTimeString(),
       };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
+      const errorMessage = {
+        text: "Sorry, something went wrong. Please try again.",
+        sender: "support",
+        time: new Date().toLocaleTimeString(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,7 +62,7 @@ const ChatButton = () => {
       {isOpen && (
         <div className="bg-white rounded-lg shadow-xl mb-4 w-80 h-96 flex flex-col overflow-hidden">
           <div className="bg-blue-700 text-white p-4 flex justify-between items-center">
-            <h3 className="font-medium">Chat Support</h3>
+            <h3 className="font-medium">AI Assist</h3>
             <button
               onClick={() => setIsOpen(false)}
               className="text-white hover:text-gray-200 transition-colors"
@@ -52,6 +70,7 @@ const ChatButton = () => {
               <X className="h-5 w-5" />
             </button>
           </div>
+
           <div className="flex-1 p-4 overflow-y-auto">
             {messages.map((msg, index) => (
               <div
@@ -59,16 +78,23 @@ const ChatButton = () => {
                 className={`p-3 rounded-lg ${
                   msg.sender === "support"
                     ? "bg-gray-100 rounded-tl-none"
-                    : "bg-blue-200 rounded-tr-none"
+                    : "bg-blue-200 rounded-tr-none ml-auto"
                 } max-w-[80%] mb-3`}
               >
                 <p className="text-sm">{msg.text}</p>
                 <span className="text-xs text-gray-500 mt-1 block">
-                  {msg.sender} • {msg.time}
+                  {msg.time}
                 </span>
               </div>
             ))}
+
+            {loading && (
+              <div className="p-3 rounded-lg bg-gray-100 max-w-[80%] mb-3 animate-pulse">
+                <p className="text-sm">Typing...</p>
+              </div>
+            )}
           </div>
+
           <div className="border-t p-3">
             <div className="flex items-center">
               <input
