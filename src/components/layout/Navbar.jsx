@@ -10,21 +10,21 @@ const Navbar = () => {
           <div className="flex items-center space-x-8">
             <NavLink
               to="/"
-              className="flex items-center text-blue-700 font-bold text-xl"
+              className="flex items-center text-blue-700 font-bold text-xl no-underline"
             >
               <Building className="h-6 w-6 mr-2" />
               <span>RoomMaster</span>
             </NavLink>
           </div>
           <div className="flex items-center space-x-8">
-            <nav className="hidden md:flex space-x-8">
+            <nav className="hidden md:flex space-x-8 ">
               <NavLink
                 to="/"
                 className={({ isActive }) =>
-                  `border-b-2 ${
+                  ` ${
                     isActive
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-600 hover:text-blue-600"
+                      ? "text-blue-600 no-underline"
+                      : "border-transparent text-gray-600 hover:text-blue-600 no-underline"
                   } px-1 py-5 text-sm font-medium transition-colors`
                 }
               >
@@ -33,10 +33,10 @@ const Navbar = () => {
               <NavLink
                 to="/reservations"
                 className={({ isActive }) =>
-                  `border-b-2 ${
+                  `${
                     isActive
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-600 hover:text-blue-600"
+                      ? "text-blue-600 no-underline"
+                      : "border-transparent text-gray-600 hover:text-blue-600 no-underline"
                   } px-1 py-5 text-sm font-medium transition-colors`
                 }
               >
@@ -45,26 +45,26 @@ const Navbar = () => {
               <NavLink
                 to="/rooms"
                 className={({ isActive }) =>
-                  `border-b-2 ${
+                  `${
                     isActive
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-600 hover:text-blue-600"
+                      ? "text-blue-600 no-underline"
+                      : "border-transparent text-gray-600 hover:text-blue-600 no-underline"
                   } px-1 py-5 text-sm font-medium transition-colors`
                 }
               >
                 Rooms
               </NavLink>
               <NavLink
-                to="/reports"
+                to="/customers"
                 className={({ isActive }) =>
-                  `border-b-2 ${
+                  `${
                     isActive
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-600 hover:text-blue-600"
+                      ? "text-blue-600 no-underline"
+                      : "border-transparent text-gray-600 hover:text-blue-600 no-underline"
                   } px-1 py-5 text-sm font-medium transition-colors`
                 }
               >
-                Reports
+                Customers
               </NavLink>
             </nav>
           </div>

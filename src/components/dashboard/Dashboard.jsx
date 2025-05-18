@@ -2,7 +2,7 @@ import React from "react";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { API_BASE } from "../App";
+import { API_BASE } from "../../App";
 import {
   Clock,
   Users,
@@ -12,10 +12,8 @@ import {
   RefreshCw,
   CalendarPlus,
 } from "lucide-react";
-import MetricCard from "../components/dashboard/MetricCard";
-import BookingsTable from "../components/dashboard/BookingsTable";
-import OccupancyChart from "../components/dashboard/OccupancyChart";
-import { occupancyData } from "../data/mockData";
+import MetricCard from "./MetricCard";
+import BookingsTable from "./BookingsTable";
 
 const Dashboard = () => {
   const today = new Date();
@@ -64,17 +62,9 @@ const Dashboard = () => {
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">{formattedDate}</p>
-        </div>
-        <div className="flex space-x-3 mt-4 md:mt-0">
-          <button className="flex items-center px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors">
-            <CalendarPlus className="h-4 w-4 mr-2" />
-            <span>New Reservation</span>
-          </button>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-gray-600">{formattedDate}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -100,14 +90,8 @@ const Dashboard = () => {
           bgColor="bg-green-100"
         />
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <BookingsTable bookings={bookingList} />
-        </div>
-        <div>
-          <OccupancyChart occupancyData={occupancyData} />
-        </div>
+      <div className="lg:col-span-2">
+        <BookingsTable bookings={bookingList} />
       </div>
     </div>
   );
