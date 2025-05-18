@@ -247,22 +247,19 @@ def get_room_occupancy_stats() -> List[Dict[str, Any]]:
 
 @tool
 def get_current_stays() -> List[Dict[str, Any]]:
-    """Get all current guest stays with customer and room details.
+    """Get all current guest stays with customer, booking, and room details, including departure date.
     
     Returns:
         List of current stays with detailed information
     """
     query = """
-    SELECT 
-        r.RoomID, r.type, r.price,
-        c.FirstName, c.LastName,
-        b.arrivalDate, b.departureDay,
-        p.price as booking_price, p.discount,
-        p.PaymentType, p.isDone as payment_completed
+    SELECT
+        r.*, 
+        b.BookingsID, b.arrivalDate, b.departureDay, 
+        c.FirstName, c.LastName
     FROM Rooms r
     JOIN Bookings b ON r.currentStay = b.BookingsID
     JOIN Customers c ON b.customerID = c.CustomerID
-    JOIN Pricing p ON b.paymentID = p.PaymentID
     WHERE r.isVacant = 0
     """
     return run_query(query)
@@ -371,9 +368,7 @@ def book_room(customer_id: int, room_id: int, arrival_date: str, departure_day: 
     result = run_query(booking_query, (customer_id, arrival_date, departure_day, payment_id))
     if "error" in result[0]:
         return result
-
-    booking_id = run_query("SELECT last_insert_rowid() as BookingsID")[0]["BookingsID"]
-
+    booking_id = result[0].get("BookingID", None)
     update_room_query = """
     UPDATE Rooms SET isVacant = 0, currentStay = ? WHERE RoomID = ?
     """
@@ -383,7 +378,34 @@ def book_room(customer_id: int, room_id: int, arrival_date: str, departure_day: 
 
 @tool
 def check_in_guest(room_id: int, booking_id: int) -> List[Dict[str, Any]]:
-    """Manually check in a guest by updating room status."""
+    """Manually check in a guest by updating room status, ensuring the room is vacant and booking matches the room and is valid for today."""
+    # Check if the room is vacant
+    room_status = run_query("SELECT isVacant, currentStay FROM Rooms WHERE RoomID = ?", (room_id,))
+    if not room_status:
+        return [{"error": "Room not found"}]
+    if room_status[0].get("isVacant") == 0:
+        return [{"error": "Room is already occupied"}]
+
+    # Check if the booking exists and is not assigned to another room
+    booking = run_query("SELECT BookingsID, arrivalDate, departureDay FROM Bookings WHERE BookingsID = ?", (booking_id,))
+    if not booking:
+        return [{"error": "Booking not found"}]
+
+    # Check if the booking is already assigned to another room
+    assigned_room = run_query("SELECT RoomID FROM Rooms WHERE currentStay = ?", (booking_id,))
+    if assigned_room:
+        return [{"error": "Booking is already assigned to another room (RoomID: %s)" % assigned_room[0].get("RoomID") }]
+
+    # Check if today's date is within the booking's arrival and departure dates
+    arrival = booking[0]["arrivalDate"]
+    departure = booking[0]["departureDay"]
+    today_query = "SELECT date('now') as today"
+    today_result = run_query(today_query)
+    today = today_result[0]["today"] if today_result else None
+    if not (arrival <= today <= departure):
+        return [{"error": f"Booking is not valid for today (today: {today}, arrival: {arrival}, departure: {departure})"}]
+
+    # All checks passed, perform check-in
     query = """
     UPDATE Rooms SET isVacant = 0, currentStay = ? WHERE RoomID = ?
     """
@@ -852,12 +874,18 @@ def get_all_customers() -> List[Dict[str, Any]]:
 
 @tool
 def get_all_bookings() -> List[Dict[str, Any]]:
-    """Retrieve all bookings from the database.
+    """Retrieve all bookings from the database, including associated room information.
     
     Returns:
-        List of all bookings
+        List of all bookings with room details
     """
-    query = "SELECT * FROM Bookings"
+    query = """
+    SELECT 
+        b.*, 
+        r.RoomID, r.type as room_type, r.price as room_price
+    FROM Bookings b
+    LEFT JOIN Rooms r ON r.currentStay = b.BookingsID
+    """
     return run_query(query)
 
 @tool
