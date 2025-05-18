@@ -173,7 +173,7 @@ def get_upcoming_arrivals(days: int = 7) -> List[Dict[str, Any]]:
            c.FirstName, c.LastName, r.RoomID, r.type
     FROM Bookings b
     JOIN Customers c ON b.customerID = c.CustomerID
-    LEFT JOIN Rooms r ON r.currentStay = b.BookingsID
+    LEFT JOIN Rooms r ON r.RoomID = b.RoomID
     WHERE date(b.arrivalDate) BETWEEN date('now') AND date('now', '+' || ? || ' days')
     ORDER BY b.arrivalDate
     """
@@ -197,7 +197,7 @@ def get_upcoming_departures(days: int = 7) -> List[Dict[str, Any]]:
            c.FirstName, c.LastName, r.RoomID, r.type
     FROM Bookings b
     JOIN Customers c ON b.customerID = c.CustomerID
-    LEFT JOIN Rooms r ON r.currentStay = b.BookingsID
+    LEFT JOIN Rooms r ON r.RoomID = b.RoomID
     WHERE date(b.departureDay) BETWEEN date('now') AND date('now', '+' || ? || ' days')
     ORDER BY b.departureDay
     """
@@ -284,7 +284,7 @@ def get_revenue_by_room_type(start_date: str = "", end_date: str = "") -> List[D
         SUM(p.price * (1 - p.discount/100.0)) as total_revenue,
         AVG(p.price * (1 - p.discount/100.0)) as avg_revenue_per_booking
     FROM Bookings b
-    JOIN Rooms r ON r.currentStay = b.BookingsID
+    JOIN Rooms r ON r.RoomID = b.RoomID
     JOIN Pricing p ON b.paymentID = p.PaymentID
     WHERE 1=1
     """
@@ -322,7 +322,7 @@ def get_customer_bookings(customer_id: int = 0, name: str = "") -> List[Dict[str
         p.price, p.discount, p.PaymentType, p.isDone
     FROM Customers c
     JOIN Bookings b ON c.CustomerID = b.customerID
-    LEFT JOIN Rooms r ON r.currentStay = b.BookingsID
+    LEFT JOIN Rooms r ON r.RoomID = b.RoomID
     JOIN Pricing p ON b.paymentID = p.PaymentID
     """
     
@@ -479,7 +479,7 @@ def get_room_by_id(room_id: int) -> List[Dict[str, Any]]:
            b.BookingsID, b.arrivalDate, b.departureDay,
            c.FirstName, c.LastName
     FROM Rooms r
-    LEFT JOIN Bookings b ON r.currentStay = b.BookingsID
+    LEFT JOIN Bookings b ON r.RoomID = b.RoomID
     LEFT JOIN Customers c ON b.customerID = c.CustomerID
     WHERE r.RoomID = ?
     """
@@ -526,7 +526,7 @@ def get_booking_details(booking_id: int) -> List[Dict[str, Any]]:
         p.price * (1 - p.discount/100.0) as final_amount
     FROM Bookings b
     JOIN Customers c ON b.customerID = c.CustomerID
-    LEFT JOIN Rooms r ON r.currentStay = b.BookingsID
+    LEFT JOIN Rooms r ON r.RoomID = b.RoomID
     JOIN Pricing p ON b.paymentID = p.PaymentID
     WHERE b.BookingsID = ?
     """
@@ -613,7 +613,7 @@ def list_bookings_by_date_range(start_date: str, end_date: str) -> List[Dict[str
         JULIANDAY(b.departureDay) - JULIANDAY(b.arrivalDate) as stay_duration
     FROM Bookings b
     JOIN Customers c ON b.customerID = c.CustomerID
-    LEFT JOIN Rooms r ON r.currentStay = b.BookingsID
+    LEFT JOIN Rooms r ON r.RoomID = b.RoomID
     JOIN Pricing p ON b.paymentID = p.PaymentID
     WHERE 
         (b.arrivalDate BETWEEN ? AND ?) OR
@@ -644,7 +644,7 @@ def get_payment_details(payment_id: int) -> List[Dict[str, Any]]:
     FROM Pricing p
     LEFT JOIN Bookings b ON p.PaymentID = b.paymentID
     LEFT JOIN Customers c ON b.customerID = c.CustomerID
-    LEFT JOIN Rooms r ON r.currentStay = b.BookingsID
+    LEFT JOIN Rooms r ON r.RoomID = b.RoomID
     WHERE p.PaymentID = ?
     """
     return run_query(query, (payment_id,))
@@ -776,7 +776,7 @@ def get_hotel_statistics() -> List[Dict[str, Any]]:
             COUNT(b.BookingsID) as booking_count,
             ROUND(COUNT(b.BookingsID) * 100.0 / (SELECT COUNT(*) FROM Bookings), 2) as booking_percentage
         FROM Rooms r
-        JOIN Bookings b ON r.currentStay = b.BookingsID OR 
+        JOIN Bookings b ON r.RoomID = b.RoomID OR 
                           (r.RoomID IN (SELECT RoomID FROM Rooms WHERE currentStay = b.BookingsID))
         GROUP BY r.type
         """
