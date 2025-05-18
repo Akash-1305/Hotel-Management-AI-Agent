@@ -12,6 +12,8 @@ from tools import (
     get_hotel_statistics, add_new_room, search_customers, get_all_tables,
     get_all_customers, get_all_bookings, get_all_rooms, get_all_payments
 )
+from langchain_core.messages import HumanMessage
+from agent import agent, parse_ai_and_tools_messages
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -239,6 +241,14 @@ def all_payments():
 async def serve_index():
     with open("frontend/index.html", "r", encoding="utf-8") as file:
         return file.read()
+    
+@app.get("/chat-ai")
+async def serve_chat_ai(user_query:str):
+    resAi = await agent.ainvoke({"messages": [
+            HumanMessage(content=user_query),]})
+    print(resAi)
+    resAi = parse_ai_and_tools_messages(resAi["messages"])
+    return resAi
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8080, reload=True)

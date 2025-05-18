@@ -1,10 +1,12 @@
 from langgraph.prebuilt import create_react_agent
 from langchain_core.runnables import Runnable
 from langchain_openai import ChatOpenAI
+from langchain_core.messages import BaseMessage, AIMessage, ToolMessage
 from tools import *
 import os
 import datetime
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
@@ -115,3 +117,22 @@ agent: Runnable = create_react_agent(
     tools=tools,
     prompt=system_prompt
 )
+
+def parse_ai_and_tools_messages(messages):
+    parsed_output = []
+    msg:BaseMessage
+    for msg in messages:
+        msg_type = type(msg)
+
+        if msg_type == AIMessage:
+            content = msg.content.strip()
+            if content:
+                parsed_output.append(f"🤖 AI:\n{content}")
+        elif msg_type == ToolMessage:
+            tool_name = msg.name
+            content = msg.content.strip()
+            if content:
+                parsed_output.append(f"🔧 Tool `{tool_name}` response:\n{content}")
+
+    return "\n\n".join(parsed_output)
+
