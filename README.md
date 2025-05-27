@@ -1,185 +1,151 @@
-# Hotel Management ReAct Agent
+# Hotel Management ReAct Agent – Project Report
 
-This project is a LangChain-powered ReAct agent that interacts with a hotel management SQLite database using Google's Gemini 2.0 Flash Lite via OpenAI-compatible API. It now includes a FastAPI-based REST API for programmatic access.
+## 1. Introduction
+This project implements an intelligent hotel management assistant using a ReAct agent architecture powered by Google Gemini 2.0 Flash Lite (via OpenAI-compatible API) and LangChain/LangGraph. The system interacts with a realistic hotel management SQLite database, providing both a conversational AI interface and a RESTful API for programmatic access.
 
-## Features
+## 2. System Architecture
 
-- 💡 Intelligent querying using a Gemini-powered agent
-- 🔍 Read table structure and query data conditionally
-- 🛠️ Uses LangChain tools for modular DB interaction
-- 🔒 Safe read-only queries (no insert/update/delete)
-- 🗃️ SQLite backend with realistic schema and sample data
-- 📊 Specialized tools for hotel analytics and insights
-- 👥 Customer tracking with name and booking history
-- 🚀 **NEW!** RESTful API with FastAPI for programmatic access
+### 2.1 Core Components
+- **agent.py**: Orchestrates the AI agent, configures the LLM, system prompt, and registers all database tools.
+- **tools.py**: Implements all business logic and database access as modular, reusable tools.
+- **api.py**: Exposes the agent and database operations as a FastAPI REST API.
+- **hotel.db**: SQLite database storing all hotel data.
 
-## Files
+### 2.2 Data Flow
+1. User sends a query (via chat or API).
+2. The agent interprets the query, selects appropriate tools from `tools.py`.
+3. Tools execute SQL queries on `hotel.db` and return results.
+4. The agent formats and returns the response to the user.
 
-- `setup.py`: Creates `hotel.db` with schema and dummy data.
-- `tools.py`: LangChain tools for reading records, describing tables, and running specialized hotel queries.
-- `agent.py`: ReAct agent using Gemini 2.0 Flash Lite via OpenAI SDK.
-- **`api.py`**: FastAPI application exposing hotel management operations as REST endpoints.
-- `.env`: Required environment variables (not included in repo).
-- `setup.sh`: Interactive setup script for macOS/Linux.
-- `setup.bat`: Interactive setup script for Windows.
+## 3. Database Schema
 
-## Quick Setup (Recommended)
+### 3.1 Table Structure
+- **Rooms**
+  - `RoomID` (Primary Key)
+  - `isVacant` (Boolean)
+  - `currentStay` (Foreign Key → Bookings.BookingsID)
+  - `type` (e.g., '2BHK', '3BHK')
+  - `price` (Numeric)
 
-### For macOS/Linux Users:
-```bash
-chmod +x setup.sh
-./setup.sh
-```
+- **Bookings**
+  - `BookingsID` (Primary Key)
+  - `customerID` (Foreign Key → Customers.CustomerID)
+  - `bookedDate` (Date)
+  - `arrivalDate` (Date)
+  - `departureDay` (Date)
+  - `paymentID` (Foreign Key → Pricing.PaymentID)
+  - `RoomID` (Foreign Key → Rooms.RoomID)
 
-### For Windows Users:
-```
-setup.bat
-```
+- **Customers**
+  - `CustomerID` (Primary Key)
+  - `FirstName`
+  - `LastName`
+  - `DOB` (Date of Birth)
+  - `IdentityType` (e.g., passport, ID card)
+  - `IdentityString` (ID number)
 
-The interactive setup script will:
-1. Check if Python is installed
-2. Create and activate a virtual environment
-3. Install all required dependencies
-4. Guide you through creating a Google Gemini API key if you don't have one
-5. Set up your `.env` file securely
-6. Initialize the database with sample data
-7. Let you test a query right away
+- **Pricing**
+  - `PaymentID` (Primary Key)
+  - `PaymentType` (e.g., credit card, cash)
+  - `isDone` (Boolean)
+  - `price` (Numeric)
+  - `discount` (Numeric or percentage)
 
-## Manual Setup
+### 3.2 Relationships
+- Bookings link customers, rooms, and payments.
+- Rooms reference current bookings.
+- Payments are associated with bookings.
 
-If you prefer to set up manually, follow these steps:
+## 4. Agent and Tooling Design
 
-### 1. Get a Google Gemini API Key
+### 4.1 Agent (agent.py)
+- Loads environment variables and configures the Gemini LLM.
+- Defines a detailed system prompt, including behavioral rules and available tools.
+- Registers all tools from `tools.py`.
+- Uses `create_react_agent` for orchestrating tool use and conversation.
+- Provides a message parsing utility for formatting responses.
 
-1. Visit the [Google AI Studio](https://aistudio.google.com/) and sign in with your Google account
-2. Click on "Get API key" in the navigation menu
-3. Create a new API key (or use an existing one)
-4. Copy the API key - you'll need it for your `.env` file
-5. **Important**: Keep your API key secure! Never commit it to version control or share it publicly
+### 4.2 Tools (tools.py) – In Depth
 
-### 2. Install dependencies
+All business logic and database access is encapsulated in tools, each implemented as a Python function decorated with `@tool`. These tools are the only way the agent can interact with the database, ensuring security and modularity.
 
-```bash
-pip install langchain langgraph langchain-openai python-dotenv sqlite3 fastapi uvicorn pyjwt python-multipart
-```
+#### 4.2.1 General Utilities
+- **Database Connection**: Securely loads the database path from environment variables and provides a connection utility.
+- **Query Execution**: All SQL is executed via a safe, parameterized function (`run_query`).
+- **Table Name Validation**: Prevents SQL injection by validating table names.
 
-### 3. Create a `.env` file
+#### 4.2.2 Data Access Tools
+- `read_records`: Read rows from any table with optional filtering and limit.
+- `describe_table`: Get schema/column info for a table.
+- `custom_query`: Run arbitrary SELECT queries (read-only, with security checks).
+- `get_all_tables`, `get_all_customers`, `get_all_bookings`, `get_all_rooms`, `get_all_payments`: List all entries in respective tables.
 
-Create a file named `.env` in the project root directory with the following content:
+#### 4.2.3 Room Management Tools
+- `get_vacant_rooms`: List vacant rooms, optionally filtered by type.
+- `get_room_by_id`: Get detailed info for a specific room.
+- `search_rooms_by_price`: Find rooms within a price range.
+- `get_room_availability`: Check if a room is available for a date range.
+- `add_new_room`: Add a new room to inventory.
+- `update_room_info`: Update room type, price, or vacancy status.
 
-```env
-GEMINI_API_KEY=your_google_api_key_here
-SQLITE_DB_PATH=hotel.db
-JWT_SECRET_KEY=your_secret_key_here
-```
+#### 4.2.4 Booking Management Tools
+- `get_upcoming_arrivals`, `get_upcoming_departures`: Track guest movement.
+- `get_customer_bookings`: List all bookings for a customer.
+- `book_room`: Book a room for a customer and update status.
+- `cancel_booking`: Cancel a booking and free the room.
+- `list_bookings_by_date_range`: List bookings within a date range.
+- `get_booking_details`: Get comprehensive booking info.
+- `update_booking_details`: Change booking dates or payment info.
 
-Replace `your_google_api_key_here` with the actual API key you obtained and use a strong random string for `JWT_SECRET_KEY`.
+#### 4.2.5 Customer Management Tools
+- `get_frequent_customers`: Identify customers with multiple bookings.
+- `add_customer`: Add a new customer.
+- `update_customer_info`: Update customer details.
+- `get_customer_by_id`: Get detailed info for a customer.
+- `search_customers`: Search by name or ID info.
 
-**Security Warning**: Never commit your `.env` file to version control or share it with others. Add it to your `.gitignore` file.
+#### 4.2.6 Payment & Pricing Tools
+- `add_payment`: Create a new payment record.
+- `apply_discount`: Apply/update a discount for a payment.
+- `get_payment_details`: View payment info.
 
-### 4. Run the database setup
+#### 4.2.7 Analytics & Statistics Tools
+- `get_room_occupancy_stats`: Occupancy by room type.
+- `get_revenue_by_room_type`: Revenue analysis by room type and date range.
+- `get_hotel_statistics`: Comprehensive hotel performance stats.
+- `get_current_stays`: View all current guests with room and payment details.
 
-```bash
-python setup.py
-```
+#### 4.2.8 Check-in/Check-out Tools
+- `check_in_guest`: Mark a room as occupied for a booking.
+- `checkout_guest`: Mark a room as vacant and clear assignment.
 
-This will create the SQLite database with sample data for testing.
+### 4.3 Security and Best Practices
+- All SQL queries are parameterized to prevent injection.
+- Only SELECT queries are allowed in `custom_query`.
+- Table names are validated.
+- All database access is funneled through tools, ensuring auditability and control.
 
-### 5. Query the agent
+## 5. REST API (api.py)
+- Built with FastAPI, exposes endpoints for all major operations (room, booking, guest, statistics, chat).
+- Uses JWT authentication for secure access.
+- Integrates with the agent for AI-powered chat and analytics.
 
-Example usage:
+## 6. Extensibility
+- New tools can be added to `tools.py` and registered in `agent.py` to expand system capabilities.
+- The modular design allows for easy adaptation to other domains or database schemas.
 
-```python
-from agent import agent
-response = agent.invoke({"input": "List all vacant 2BHK rooms."})
-print(response["output"])
-```
+## 7. Example Use Cases
+- List all vacant rooms of a certain type.
+- Find frequent customers and their booking history.
+- Analyze revenue by room type for a given period.
+- Check if a room is available for a specific date range.
+- Add a new customer and book a room for them.
+- Apply a discount to a payment and view updated revenue stats.
 
-## Available Specialized Tools
-
-The system includes several specialized tools for hotel analytics:
-
-- **Room Management**: Find vacant rooms by type
-- **Guest Movement**: Track upcoming arrivals and departures
-- **Customer Insights**: Identify frequent customers and booking history
-- **Business Intelligence**: Analyze occupancy rates and revenue performance
-
-## REST API Usage
-
-The project now includes a complete REST API built with FastAPI that can be used to programmatically access and manage the hotel system.
-
-### Starting the API Server
-
-```bash
-# Make sure your virtual environment is activated first
-python api.py
-```
-
-The API server will start on http://localhost:8000. You can view the interactive API documentation at http://localhost:8000/docs.
-
-### API Authentication
-
-The API uses JWT token-based authentication:
-
-1. Login using the `/api/auth/login` endpoint with username "admin" and password "password123" (demo credentials)
-2. Use the returned access token in the Authorization header for other requests: `Bearer {token}`
-
-### Available Endpoints
-
-#### Authentication
-- `POST /api/auth/login` - Obtain access token
-- `POST /api/auth/logout` - Logout (invalidate token)
-- `POST /api/auth/refresh-token` - Refresh access token
-
-#### Room Management
-- `GET /api/rooms` - List all rooms
-- `GET /api/rooms/{room_id}` - Get room details
-- `GET /api/rooms/available` - Get available rooms
-- `PUT /api/rooms/{room_id}/status` - Update room status
-
-#### Booking Management
-- `GET /api/bookings` - List all bookings
-- `GET /api/bookings/{booking_id}` - Get booking details
-- `POST /api/bookings` - Create new booking
-- `PUT /api/bookings/{booking_id}` - Update booking
-- `DELETE /api/bookings/{booking_id}` - Cancel booking
-- `POST /api/bookings/{booking_id}/check-in` - Check-in guest
-- `POST /api/bookings/{booking_id}/check-out` - Check-out guest
-
-#### Guest Management
-- `GET /api/guests` - List all guests
-- `GET /api/guests/{guest_id}` - Get guest details
-- `POST /api/guests` - Create new guest
-- `PUT /api/guests/{guest_id}` - Update guest information
-
-#### Statistics & Analytics
-- `GET /api/stats/occupancy` - Get current occupancy stats
-- `GET /api/stats/bookings` - Get booking statistics
-- `GET /api/stats/revenue` - Get revenue data
-- `GET /api/stats/forecast` - Get occupancy forecast
-
-#### AI Chat
-- `POST /api/chat/message` - Send message to AI assistant
-- `GET /api/chat/history` - Get chat history
-
-### Example API Usage
-
-Using curl to authenticate and get available rooms:
-
-```bash
-# Login and get token
-TOKEN=$(curl -s -X POST "http://localhost:8000/api/auth/login" -H "Content-Type: application/x-www-form-urlencoded" -d "username=admin&password=password123" | jq -r '.access_token')
-
-# Get available rooms
-curl -X GET "http://localhost:8000/api/rooms/available" -H "Authorization: Bearer $TOKEN"
-```
+## 8. Conclusion
+This project demonstrates a robust, modular, and secure approach to building an AI-powered hotel management system. By leveraging LangChain, Gemini LLM, and a well-structured toolset, it provides both conversational and programmatic interfaces for efficient hotel operations and analytics.
 
 ---
 
-## Schema Overview
-
-- `Rooms(RoomID, isVacant, currentStay, type, price)`
-- `Bookings(BookingsID, customerID, bookedDate, arrivalDate, departureDay, paymentID)`
-- `Customers(CustomerID, FirstName, LastName, DOB, IdentityType, IdentityString)`
-- `Pricing(PaymentID, PaymentType, isDone, price, discount)`
+*For further details, see the code in `agent.py`, `tools.py`, and `api.py`.*
 

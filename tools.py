@@ -361,6 +361,21 @@ def add_payment(payment_type: str, price: float, discount: float = 0.0, is_done:
 @tool
 def book_room(customer_id: int, room_id: int, arrival_date: str, departure_day: str, payment_id: int) -> List[Dict[str, Any]]:
     """Book a room and update room status."""
+    # Validate that customer exists
+    customer_check = run_query("SELECT CustomerID FROM Customers WHERE CustomerID = ?", (customer_id,))
+    if not customer_check:
+        return [{"error": f"Customer with ID {customer_id} does not exist"}]
+    
+    # Validate that room exists
+    room_check = run_query("SELECT RoomID FROM Rooms WHERE RoomID = ?", (room_id,))
+    if not room_check:
+        return [{"error": f"Room with ID {room_id} does not exist"}]
+    
+    # Validate that payment exists
+    payment_check = run_query("SELECT PaymentID FROM Pricing WHERE PaymentID = ?", (payment_id,))
+    if not payment_check:
+        return [{"error": f"Payment with ID {payment_id} does not exist"}]
+    
     booking_query = """
     INSERT INTO Bookings (customerID, bookedDate, arrivalDate, departureDay, paymentID, RoomID)
     VALUES (?, date('now'), ?, ?, ?, ?)

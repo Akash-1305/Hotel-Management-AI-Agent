@@ -1,0 +1,31 @@
+[Bookings]
+    *BookingsID {label:"INTEGER"}
+    RoomID {label:"INTEGER"}
+    arrivalDate {label:"DATE"}
+    bookedDate {label:"DATE"}
+    customerID {label:"INTEGER"}
+    departureDay {label:"DATE"}
+    paymentID {label:"INTEGER"}
+[Customers]
+    *CustomerID {label:"INTEGER"}
+    DOB {label:"DATE"}
+    FirstName {label:"TEXT"}
+    IdentityString {label:"TEXT"}
+    IdentityType {label:"TEXT"}
+    LastName {label:"TEXT"}
+[Pricing]
+    *PaymentID {label:"INTEGER"}
+    PaymentType {label:"TEXT"}
+    discount {label:"REAL"}
+    isDone {label:"BOOLEAN"}
+    price {label:"REAL"}
+[Rooms]
+    *RoomID {label:"INTEGER"}
+    currentStay {label:"INTEGER"}
+    isVacant {label:"BOOLEAN"}
+    price {label:"REAL"}
+    type {label:"TEXT"}
+Rooms."RoomID" ?--* Bookings."RoomID"
+Pricing."PaymentID" 1--* Bookings."paymentID"
+Customers."CustomerID" 1--* Bookings."customerID"
+Bookings."BookingsID" ?--* Rooms."currentStay"
