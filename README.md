@@ -142,7 +142,7 @@ Contributions are welcome! Please fork the repository and create a pull request.
 
 If you encounter any issues, please check the GitHub Issues section for existing solutions or report a new issue.
 
-For further assistance, feel free to reach out via email: akash20050513@gmail.com.
+For further assistance, feel free to reach out via email: akash20050513@gmail.com & mohamedkamran2211@gmail.com.
 
 We appreciate feedback and suggestions to improve the platform!
 
