@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { API_BASE } from "../../App";
 
@@ -11,6 +11,22 @@ const NewBookingForm = ({ onClose }) => {
     payment_id: "",
   });
 
+  const [customers, setCustomers] = useState([]);
+  const [rooms, setRooms] = useState([]);
+
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  useEffect(() => {
+    getAllRooms();
+    getUsers();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -21,6 +37,18 @@ const NewBookingForm = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const today = getTodayDate();
+
+    if (formData.arrival_date < today) {
+      alert("Arrival date cannot be earlier than today.");
+      return;
+    }
+
+    if (formData.departure_day < formData.arrival_date) {
+      alert("Departure date must be after arrival date.");
+      return;
+    }
 
     try {
       await axios.post(`${API_BASE}/book-room`, null, {
@@ -50,28 +78,54 @@ const NewBookingForm = ({ onClose }) => {
     }
   };
 
+  const getAllRooms = () => {
+    axios
+      .get(`${API_BASE}/all-rooms`)
+      .then((res) => setRooms(res.data))
+      .catch((err) => console.error("Error fetching rooms:", err));
+  };
+
+  const getUsers = () => {
+    axios
+      .get(`${API_BASE}/all-customers`)
+      .then((res) => setCustomers(res.data))
+      .catch((err) => console.log(err));
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg max-w-md mx-auto">
       <h2 className="text-xl font-bold mb-4">New Room Booking</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
+        <select
           name="customer_id"
           value={formData.customer_id}
           onChange={handleChange}
-          placeholder="Customer ID"
-          type="number"
           className="border p-2 rounded w-full"
           required
-        />
-        <input
+        >
+          <option value="" hidden>Select Customer</option>
+          {customers.map((customer) => (
+            <option key={customer.CustomerID} value={customer.CustomerID}>
+              {customer.CustomerID}
+            </option>
+          ))}
+        </select>
+
+        <select
           name="room_id"
           value={formData.room_id}
           onChange={handleChange}
-          placeholder="Room ID"
-          type="number"
           className="border p-2 rounded w-full"
           required
-        />
+        >
+          <option value="" hidden>Select Room</option>
+          {rooms.map((room) => (
+            <option key={room.RoomID} value={room.RoomID}>
+              {room.RoomID}
+            </option>
+          ))}
+        </select>
+
         <label className="block">
           Arrival Date
           <input
@@ -83,6 +137,7 @@ const NewBookingForm = ({ onClose }) => {
             required
           />
         </label>
+
         <label className="block">
           Departure Date
           <input
@@ -94,6 +149,7 @@ const NewBookingForm = ({ onClose }) => {
             required
           />
         </label>
+
         <input
           name="payment_id"
           value={formData.payment_id}
@@ -103,6 +159,7 @@ const NewBookingForm = ({ onClose }) => {
           className="border p-2 rounded w-full"
           required
         />
+
         <button
           type="submit"
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"

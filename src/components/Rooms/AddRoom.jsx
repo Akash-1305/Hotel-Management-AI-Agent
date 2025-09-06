@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { X } from "lucide-react";
 import { API_BASE } from "../../App";
@@ -10,7 +10,13 @@ const AddRoom = ({ onClose }) => {
     price: "",
   });
 
+  const [rooms, setRooms] = useState([]);
+
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    getAllRooms();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,8 +30,17 @@ const AddRoom = ({ onClose }) => {
     e.preventDefault();
     setLoading(true);
 
+    const roomId = parseInt(formData.room_id);
+    const exists = rooms.some((room) => parseInt(room.RoomID) === roomId);
+
+    if (exists) {
+      alert("Room ID already exists!");
+      setLoading(false);
+      return;
+    }
+
     const params = {
-      room_id: parseInt(formData.room_id),
+      room_id: roomId,
       room_type: formData.room_type,
       price: parseFloat(formData.price),
     };
@@ -45,6 +60,17 @@ const AddRoom = ({ onClose }) => {
         setLoading(false);
       });
   };
+
+  function getAllRooms() {
+    axios
+      .get(API_BASE + `/all-rooms`)
+      .then((res) => {
+        setRooms(res.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching rooms:", err);
+      });
+  }
 
   return (
     <div

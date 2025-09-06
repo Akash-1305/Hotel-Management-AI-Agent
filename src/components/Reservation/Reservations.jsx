@@ -10,6 +10,26 @@ const Reservations = () => {
   const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
 
+  // Get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const today = getTodayDate();
+
+  // Convert any date string to YYYY-MM-DD format for easy comparison
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   useEffect(() => {
     getBookedRooms();
   }, []);
@@ -36,7 +56,7 @@ const Reservations = () => {
       })
       .catch((err) => {
         console.error("Check-in failed:", err);
-        alert("Check-in failed.");
+        alert(err.response?.data?.message);
       });
   };
 
@@ -49,7 +69,7 @@ const Reservations = () => {
       })
       .catch((err) => {
         console.error("Check-out failed:", err);
-        alert("Check-out failed.");
+        alert(err.response?.data?.message);
       });
   };
 
@@ -128,18 +148,22 @@ const Reservations = () => {
                 </div>
 
                 <div className="flex gap-2 mt-4 justify-center">
-                  <button
-                    onClick={() => handleCheckIn(booking)}
-                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                  >
-                    Check-In
-                  </button>
-                  <button
-                    onClick={() => handleCheckOut(booking.RoomID)}
-                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                  >
-                    Check-Out
-                  </button>
+                  {formatDate(booking.arrivalDate) <= today && (
+                    <button
+                      onClick={() => handleCheckIn(booking)}
+                      className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                    >
+                      Check-In
+                    </button>
+                  )}
+                  {formatDate(booking.arrivalDate) <= today && (
+                    <button
+                      onClick={() => handleCheckOut(booking.RoomID)}
+                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                    >
+                      Check-Out
+                    </button>
+                  )}
                   <button
                     onClick={() => handleCancel(booking.BookingsID)}
                     className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
@@ -150,7 +174,7 @@ const Reservations = () => {
               </div>
             ))}
             {bookingList.length === 0 && (
-              <p className="text-gray-500 text-sm col-span-full">
+              <p className="text-blue-500 text-sm col-span-full">
                 No reservations found.
               </p>
             )}

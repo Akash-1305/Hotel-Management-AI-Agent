@@ -3,11 +3,7 @@ import { format } from "date-fns";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { API_BASE } from "../../App";
-import {
-  Users,
-  CheckCircle,
-  DollarSign,
-} from "lucide-react";
+import { Users, CheckCircle, DollarSign } from "lucide-react";
 import MetricCard from "./MetricCard";
 import BookingsTable from "./BookingsTable";
 import ArrivalTable from "./ArrivalTable";
@@ -89,13 +85,6 @@ const Dashboard = () => {
           title="Occupied Rooms"
           value={occupancyDataState.occupied_rooms || bookingList.length}
           icon={CheckCircle}
-          color="text-green-600"
-          bgColor="bg-green-100"
-        />
-        <MetricCard
-          title="Revenue"
-          value={`$${(revenueData.total_revenue || 0).toFixed(2)}`}
-          icon={DollarSign}
           color="text-green-600"
           bgColor="bg-green-100"
         />

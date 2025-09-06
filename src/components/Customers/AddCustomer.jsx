@@ -58,14 +58,18 @@ const AddCustomer = () => {
         className="w-full border p-2 rounded"
         required
       />
-      <input
-        type="text"
-        placeholder="Identity Type"
+      <select
         value={identity_type}
         onChange={(e) => setIdentityType(e.target.value)}
         className="w-full border p-2 rounded"
         required
-      />
+      >
+        <option value="" hidden>Select Identity Type</option>
+        <option value="Adhar">Adhar</option>
+        <option value="Driver's License">Driver's License</option>
+        <option value="PAN">PAN</option>
+      </select>
+
       <input
         type="text"
         placeholder="Identity Number"
