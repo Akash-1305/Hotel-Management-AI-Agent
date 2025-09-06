@@ -1,6 +1,6 @@
 # Hotel Management
 
-A **Hotel Management ** built with **FastAPI (backend)** and **React Vite (frontend)**, with AI-powered chat support via **LangChain Agent**.  
+A **Hotel Management** built with **FastAPI (backend)** and **React Vite (frontend)**, with AI-powered chat support via **LangChain Agent**.  
 This application allows hotel staff to manage rooms, bookings, customers, payments, and generate statistics with ease.
 
 ---
